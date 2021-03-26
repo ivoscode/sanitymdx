@@ -1,20 +1,16 @@
-import Link from "next/link";
+import Hero from "../components/home-page/hero";
 import { getSanityContent } from "../utils/sanity";
 
-export default function Index({ pages }) {
+export default function Index(props) {
+  const { hero } = props;
+
   return (
     <div>
-      <h1>This Site Loads MDX From Sanity.io</h1>
-      <p>View any of these pages to see it in action:</p>
-      <ul>
-        {pages.map(({ title, slug }) => (
-          <li key={slug}>
-            <Link href={`/${slug}`}>
-              <a>{title}</a>
-            </Link>
-          </li>
-        ))}
-      </ul>
+      <Hero imgsource={hero.coverImage.asset.url} alt="hero picture" />
+
+      <h1 className="text-4xl">
+        space for featured posts and afi links with filter
+      </h1>
     </div>
   );
 }
@@ -22,23 +18,27 @@ export default function Index({ pages }) {
 export async function getStaticProps() {
   const data = await getSanityContent({
     query: `
-      query AllPages {
-        allPage {
-          title
-          slug {
-            current
-          }
-        }
+    query AllPages {
+  allHero {
+    heroimage
+    coverImage {
+      asset {
+        url
       }
+    }
+
+    content
+  }
+  
+}
+
+
     `,
   });
 
-  const pages = data.allPage.map((page) => ({
-    title: page.title,
-    slug: page.slug.current,
-  }));
+  const hero = data.allHero[0];
 
   return {
-    props: { pages },
+    props: { hero },
   };
 }

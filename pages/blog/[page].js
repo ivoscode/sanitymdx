@@ -1,9 +1,10 @@
 import hydrate from "next-mdx-remote/hydrate";
 import renderToString from "next-mdx-remote/render-to-string";
-import Callout from "../components/callout";
-import { getSanityContent } from "../utils/sanity";
+import Image from "next/image";
+import Callout from "../../components/markup/callout";
+import { getSanityContent } from "../../utils/sanity";
 
-export default function Page({ title, content }) {
+export default function Page({ title, content, blogImage }) {
   const renderedContent = hydrate(content, {
     components: {
       Callout,
@@ -13,6 +14,16 @@ export default function Page({ title, content }) {
   return (
     <div>
       <h1>{title}</h1>
+      <div className=" relative h-48 w-1/3 m-10">
+        <Image
+          src={blogImage}
+          alt="blog image"
+          layout="fill"
+          objectFit="cover"
+          objectPosition="center center"
+        />
+      </div>
+
       {renderedContent}
     </div>
   );
@@ -20,20 +31,23 @@ export default function Page({ title, content }) {
 
 export async function getStaticProps({ params }) {
   const data = await getSanityContent({
-    query: `
-          query PageBySlug($slug: String!) {
-            allPage(where: { slug: { current: { eq: $slug } } }) {
-              title
-              content
-            }
-          }
-        `,
+    query: `query PageBySlug($slug: String!) {
+  allBlog(where: { slug: { current: { eq: $slug } } }) {
+    title
+    content
+    coverImage {
+      asset {
+        url
+      }
+    }
+  }
+}`,
     variables: {
       slug: params.page,
     },
   });
 
-  const [pageData] = data.allPage;
+  const [pageData] = data.allBlog;
 
   const content = await renderToString(pageData.content, {
     components: { Callout },
@@ -43,6 +57,7 @@ export async function getStaticProps({ params }) {
     props: {
       title: pageData.title,
       content,
+      blogImage: pageData.coverImage.asset.url,
     },
   };
 }
@@ -51,7 +66,7 @@ export async function getStaticPaths() {
   const data = await getSanityContent({
     query: `
           query AllPages {
-            allPage {
+            allBlog {
               slug {
                 current
               }
@@ -60,10 +75,10 @@ export async function getStaticPaths() {
         `,
   });
 
-  const pages = data.allPage;
+  const pages = data.allBlog;
 
   return {
-    paths: pages.map((p) => `/${p.slug.current}`),
+    paths: pages.map((p) => `/blog/${p.slug.current}`),
     fallback: false,
   };
 }
