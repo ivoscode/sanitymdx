@@ -1,18 +1,9 @@
-import Link from "next/link";
+import PostsGrid from "../../components/postsGrid";
 import { getSanityContent } from "../../utils/sanity";
-export default function Blog({ pages }) {
+export default function Blog({ posts }) {
   return (
     <div>
-      <ul>
-        {}
-        {pages.map(({ title, slug }) => (
-          <li key={slug}>
-            <Link href={`/blog/${slug}`}>
-              <a>{title}</a>
-            </Link>
-          </li>
-        ))}
-      </ul>
+      <PostsGrid posts={posts} />
     </div>
   );
 }
@@ -23,9 +14,8 @@ export async function getStaticProps() {
   
   allBlog {
     title
-    slug {
-      current
-    }
+    coverImage {asset {url}}
+    slug {current}
     content
   }
 }
@@ -34,12 +24,14 @@ export async function getStaticProps() {
     `,
   });
 
-  const pages = data.allBlog.map((blog) => ({
-    title: blog.title,
-    slug: blog.slug.current,
+  const posts = data.allBlog.map((blogpost) => ({
+    title: blogpost.title,
+    slug: blogpost.slug.current,
+    content: blogpost.content,
+    coverImage: blogpost.coverImage.asset.url,
   }));
 
   return {
-    props: { pages },
+    props: { posts },
   };
 }

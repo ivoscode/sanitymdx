@@ -4,7 +4,7 @@ import Image from "next/image";
 import Callout from "../../components/markup/callout";
 import { getSanityContent } from "../../utils/sanity";
 
-export default function Page({ title, content, blogImage }) {
+export default function Page({ title, content, coverImage }) {
   const renderedContent = hydrate(content, {
     components: {
       Callout,
@@ -12,11 +12,14 @@ export default function Page({ title, content, blogImage }) {
   });
 
   return (
-    <div>
-      <h1>{title}</h1>
-      <div className=" relative h-48 w-1/3 m-10">
+    <article>
+      <h1 className="text-6xl md:text-7xl lg:text-8xl font-bold tracking-tighter leading-tight md:leading-none mb-12 text-center md:text-left">
+        {title}
+      </h1>
+
+      <div className=" relative h-48 w-1/3  -mx-5 sm:mx-0">
         <Image
-          src={blogImage}
+          src={coverImage}
           alt="blog image"
           layout="fill"
           objectFit="cover"
@@ -25,7 +28,7 @@ export default function Page({ title, content, blogImage }) {
       </div>
 
       {renderedContent}
-    </div>
+    </article>
   );
 }
 
@@ -57,7 +60,7 @@ export async function getStaticProps({ params }) {
     props: {
       title: pageData.title,
       content,
-      blogImage: pageData.coverImage.asset.url,
+      coverImage: pageData.coverImage.asset.url,
     },
   };
 }
